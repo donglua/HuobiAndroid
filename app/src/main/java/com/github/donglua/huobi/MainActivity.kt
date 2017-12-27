@@ -1,7 +1,8 @@
-package com.droiders.huobi
+package com.github.donglua.huobi
 
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import com.droiders.huobi.R
 
 class MainActivity : AppCompatActivity() {
 
