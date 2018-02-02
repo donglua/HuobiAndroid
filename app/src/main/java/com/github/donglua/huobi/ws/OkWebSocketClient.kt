@@ -31,39 +31,7 @@ class OkWebSocketClient private constructor() : WebSocketListener() {
     private object Holder { val INSTANCE = OkWebSocketClient() }
 
     fun init(): WebSocket {
-        val logging = HttpLoggingInterceptor().apply { level = HttpLoggingInterceptor.Level.BODY }
         val client = OkHttpClient.Builder()
-                .addInterceptor { chain ->
-                    Timber.d("----- addInterceptor")
-                    val userRequest = chain.request()
-                    val requestBuilder = userRequest.newBuilder()
-
-                    val body = userRequest.body()
-                    if (body != null) {
-                        val contentType = body.contentType()
-                        if (contentType != null) {
-                            requestBuilder.header("Content-Type", contentType.toString())
-                        }
-                        val contentLength = body.contentLength()
-                        if (contentLength != -1L) {
-                            requestBuilder.header("Content-Length", java.lang.Long.toString(contentLength))
-                            requestBuilder.removeHeader("Transfer-Encoding")
-                        } else {
-                            requestBuilder.header("Transfer-Encoding", "chunked")
-                            requestBuilder.removeHeader("Content-Length")
-                        }
-                    }
-                    val networkResponse = chain.proceed(chain.request())
-                    val responseBuilder = networkResponse.newBuilder().request(userRequest)
-                    if (HttpHeaders.hasBody(networkResponse)) {
-                        Timber.d("----- hasBody")
-                        val responseBody = GzipSource(networkResponse.body()!!.source())
-                        val contentType = networkResponse.header("Content-Type")
-                        responseBuilder.body(RealResponseBody(contentType, -1L, Okio.buffer(responseBody)))
-                    }
-                    return@addInterceptor responseBuilder.build();
-                }
-                .addNetworkInterceptor(logging)
                 .build()
         val request = Request.Builder()
                 .url(WS_URL)
